@@ -17,6 +17,26 @@ class TestPlayground(unittest.TestCase):
 
         self.assertEqual(y, expected_value)
 
+    def test_add_list3(self):
+        """Test addition of list of 3 elements"""
+
+        x = [1, 2, 3]
+        y = playground.sum_list(x)
+
+        expected_value = 6
+
+        self.assertEqual(y, expected_value)
+
+    def test_with_tuple(self):
+        """Test that it works with a tuple input"""
+
+        x = (1, 2, 3, 4)
+        y = playground.sum_list(x)
+
+        expected_value = 10
+
+        self.assertEqual(y, expected_value)
+
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)
