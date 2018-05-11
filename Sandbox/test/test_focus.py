@@ -18,6 +18,7 @@ class TestQuadFocus(unittest.TestCase):
     """Test that quad autofocus runs and improves image"""
 
     def test_quad_focus(self):
+        """Test that we can blur and image and refocus it"""
         image = np.linalg.norm(np.double(astronaut()), axis=2)
         plt.Figure()
         plt.imshow(image)

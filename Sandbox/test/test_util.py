@@ -9,6 +9,7 @@ from Sandbox.playground import util
 
 class TestFFTUtils(unittest.TestCase):
     def test_ffts_odd(self):
+        """Test FFTS with odd length"""
         x = [1, 1, 1]
         y = util.ffts(x)
 
@@ -17,6 +18,7 @@ class TestFFTUtils(unittest.TestCase):
         assert_allclose(y, expected_y)
 
     def test_ffts_even(self):
+        """Test FFTS with even length"""
         x = [1, 1, 1, 1]
         y = util.ffts(x)
 
@@ -25,6 +27,7 @@ class TestFFTUtils(unittest.TestCase):
         assert_allclose(y, expected_y)
 
     def test_iffts_odd(self):
+        """Test IFFTS with odd length"""
         x = [1, 1, 1]
         y = util.iffts(x)
 
@@ -33,6 +36,7 @@ class TestFFTUtils(unittest.TestCase):
         assert_allclose(y, expected_y)
 
     def test_iffts_even(self):
+        """Test IFFTS with even length"""
         x = [1, 1, 1, 1]
         y = util.iffts(x)
 
@@ -41,6 +45,7 @@ class TestFFTUtils(unittest.TestCase):
         assert_allclose(y, expected_y)
 
     def test_1d_inverses(self):
+        """Test that FFTS and IFFTS are inverses of each other"""
 
         def check_inverses(x):
             y = util.ffts(x)
@@ -66,6 +71,7 @@ class TestFFTUtils(unittest.TestCase):
         check_inverses(x)
 
     def test_ffts2_odd_odd(self):
+        """Test FFTS2 with odd x odd input"""
         x = np.ones((3, 3))
         y = util.ffts2(x)
 
@@ -76,6 +82,7 @@ class TestFFTUtils(unittest.TestCase):
         assert_allclose(y, expected_y)
 
     def test_ffts2_odd_even(self):
+        """Test FFTS2 with odd x even input"""
         x = np.ones((3, 4))
         y = util.ffts2(x)
 
@@ -90,6 +97,7 @@ class TestFFTUtils(unittest.TestCase):
         assert_allclose(y.T, expected_y)
 
     def test_ffts2_even_even(self):
+        """Test FFTS2 with even x even input"""
         x = np.ones((4, 4))
         y = util.ffts2(x)
 
@@ -101,6 +109,7 @@ class TestFFTUtils(unittest.TestCase):
         assert_allclose(y, expected_y)
 
     def test_iffts2_odd_odd(self):
+        """Test IFFTS2 with odd x odd input"""
         x = np.ones((3, 3))
         y = util.iffts2(x)
 
@@ -111,6 +120,7 @@ class TestFFTUtils(unittest.TestCase):
         assert_allclose(y, expected_y)
 
     def test_iffts2_odd_even(self):
+        """Test IFFTS2 with even x even input"""
         x = np.ones((3, 4))
         y = util.iffts2(x)
 
@@ -125,6 +135,7 @@ class TestFFTUtils(unittest.TestCase):
         assert_allclose(y.T, expected_y)
 
     def test_iffts2_even_even(self):
+        """Test IFFTS2 with even x even input"""
         x = np.ones((4, 4))
         y = util.iffts2(x)
 
@@ -136,6 +147,7 @@ class TestFFTUtils(unittest.TestCase):
         assert_allclose(y, expected_y)
 
     def test_2d_inverses(self):
+        """Test that FFTS and IFFTS are inverses of each other"""
         def check_inverses(x):
             y = util.ffts2(x)
             z = util.iffts2(y)
