@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from Sandbox.playground import util
+from Sandbox import util
 
 
 def apply_qpe(x, qpe):

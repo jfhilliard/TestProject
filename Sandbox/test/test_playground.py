@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from Sandbox.playground import playground
+from Sandbox import playground
 
 
 class TestPlayground(unittest.TestCase):

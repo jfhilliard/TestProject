@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 from numpy.testing import assert_allclose
 
-from Sandbox.playground import util
+from Sandbox import util
 
 
 class TestFFTUtils(unittest.TestCase):
