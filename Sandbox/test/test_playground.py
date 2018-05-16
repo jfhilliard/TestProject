@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from Sandbox import playground
+from Sandbox.playground.playground import sum_list
 
 
 class TestPlayground(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestPlayground(unittest.TestCase):
         """Test addition of list of 2 elements"""
 
         x = [1, 2]
-        y = playground.sum_list(x)
+        y = sum_list(x)
 
         expected_value = 3
 
@@ -21,7 +21,7 @@ class TestPlayground(unittest.TestCase):
         """Test addition of list of 3 elements"""
 
         x = [1, 2, 3]
-        y = playground.sum_list(x)
+        y = sum_list(x)
 
         expected_value = 6
 
@@ -31,7 +31,7 @@ class TestPlayground(unittest.TestCase):
         """Test that it works with a tuple input"""
 
         x = (1, 2, 3, 4)
-        y = playground.sum_list(x)
+        y = sum_list(x)
 
         expected_value = 10
 
