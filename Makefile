@@ -7,3 +7,6 @@ install:
 
 test: install
 	$(PYTEST) --verbose --cov --cov-report=term-missing
+
+clean:
+	-rm -rf build/*
