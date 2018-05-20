@@ -3,7 +3,7 @@ PYTEST = /opt/anaconda3/bin/pytest
 PREFIX = $(PYTHONPREFIX)
 
 install:
-	$(PYTHON) setup.py install --prefix=$(PREFIX)
+	$(PYTHON) setup.py -q install --prefix=$(PREFIX)
 
 test: install
 	$(PYTEST) --verbose --cov --cov-report=term-missing
