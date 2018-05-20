@@ -5,7 +5,7 @@ import numpy as np
 import scipy.fftpack
 
 from numpy.testing import assert_allclose
-from Sandbox.utils.dct import dct, idct, dct2
+from Sandbox.utils.dct import dct, idct, dct2, idct2
 
 
 class TestDCT(unittest.TestCase):
@@ -16,7 +16,8 @@ class TestDCT(unittest.TestCase):
         x1 = np.ones(N)
         x2 = np.zeros(N)
         x2[0] = 1
-        x_cos = [np.cos((np.arange(N) + 0.5) * x * np.pi / N) for x in range(N)]
+        x_cos = [np.cos((np.arange(N) + 0.5) * x * np.pi / N)
+                 for x in range(N)]
         self.x_list = [x1, x2] + x_cos
 
         expected1 = np.zeros(N)
@@ -88,6 +89,7 @@ class TEST2DDCT(unittest.TestCase):
                                     for n, m in enumerate(range(N-1, -1, -1))]
 
     def test_dct2(self):
+        """Test my 2D DCT function"""
         for n, x in enumerate(self.x_cos2_list):
             y = dct2(x)
             assert_allclose(y, self.expected_cos2_list[n], atol=1e-10)
@@ -100,6 +102,14 @@ class TEST2DDCT(unittest.TestCase):
 
             # Scipy has a scale factor of 2^2 difference
             assert_allclose(y, y_scipy / (2.0**2.0), atol=1e-10)
+
+    def test_idct2(self):
+        """Test inverse 2D DCT inverts the forward 2D DCT"""
+        for x in self.x_cos2_list:
+            y = dct2(x)
+            z = idct2(y)
+
+            assert_allclose(z, x, atol=1e-10)
 
 
 if __name__ == '__main__':

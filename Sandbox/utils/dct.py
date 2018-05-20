@@ -37,3 +37,15 @@ def dct2(x):
         y[:, n] = dct(y_col)
 
     return y
+
+
+def idct2(x):
+    """Returns the 2d DCT of 2d array x"""
+    x = np.array(x)
+    y = np.zeros(x.shape)
+    for n, x_row in enumerate(x):
+        y[n] = idct(x_row)
+    for n, y_col in enumerate(y.T):
+        y[:, n] = idct(y_col)
+
+    return y
