@@ -15,12 +15,15 @@ class TestDCT(unittest.TestCase):
         x1 = np.ones(N)
         x2 = np.zeros(N)
         x2[0] = 1
-        self.x_list = [x1, x2]
+        x_cos = [np.cos((np.arange(N) + 0.5) * x * np.pi / N) for x in range(N)]
+        self.x_list = [x1, x2] + x_cos
 
         expected1 = np.zeros(N)
         expected1[0] = N
         expected2 = np.cos(np.arange(N) * np.pi / N / 2)
-        self.expected_list = [expected1, expected2]
+        expected_cos = np.eye(N) * N / 2.0
+        expected_cos[0, 0] = N
+        self.expected_list = [expected1, expected2] + list(expected_cos)
 
     def test_dct(self):
         """Test DCT with a variety of inputs"""
