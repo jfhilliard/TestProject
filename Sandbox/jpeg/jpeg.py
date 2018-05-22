@@ -18,7 +18,7 @@ k_g = 0.587
 k_b = 0.114
 
 
-def rgb_to_ycbcr(rgb_image):
+def rgb_to_ypbpr(rgb_image):
     """Converts an RGB image into a Y'CBCR image"""
     # TODO: Implement gamma correction
     r_prime = rgb_image[:, :, 0]
@@ -31,17 +31,7 @@ def rgb_to_ycbcr(rgb_image):
     c_r = 0.5 * (r_prime - y_prime) / (1.0 - k_r)
 
     component_list = [y_prime, c_b, c_r]
-    scaled_comp_list = [scale_zero_to_one(comp) for comp in component_list]
 
-    ycbcr = np.stack(scaled_comp_list, 2)
+    ycbcr = np.stack(component_list, 2)
 
     return ycbcr
-
-
-def scale_zero_to_one(x):
-    min_x = np.min(x)
-    max_x = np.max(x)
-
-    x -= min_x
-    x = x / (max_x - min_x)
-    return x
