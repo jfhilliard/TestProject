@@ -18,8 +18,25 @@ k_g = 0.587
 k_b = 0.114
 
 
+def rgb_to_ycbcr(rgb_image):
+    """Converts an 8-bit RGB image to a gamma corrected Y'CBCR Image
+
+    Input: rgb_image with 8-bit channels (0-255)
+
+    Output: ycbcr_image with 8-bit channles (0-255)"""
+    ypbpr_image = rgb_to_ypbpr(rgb_image)
+
+    ypbpr_image[:, :, 1:3] += 0.5
+    ycbcr_image = ypbpr_image * 255
+
+    return ycbcr_image.astype('uint8')
+
+
 def rgb_to_ypbpr(rgb_image):
-    """Converts an RGB image into a Y'CBCR image"""
+    """Converts an RGB image into a Y'PBPR image"""
+    if rgb_image.dtype == 'uint8':
+        rgb_image = gamma_correct(rgb_image)
+
     # TODO: Implement gamma correction
     r_prime = rgb_image[:, :, 0]
     g_prime = rgb_image[:, :, 1]
@@ -35,3 +52,15 @@ def rgb_to_ypbpr(rgb_image):
     ycbcr = np.stack(component_list, 2)
 
     return ycbcr
+
+
+def gamma_correct(rgb_image, gamma=0.45):
+    """Apply gamma correction and scale values to range 0 to 1
+
+    Input: rgb_image with 8-bit channels (0-255)
+
+    Output: gamma corrected rgb image with floating point values (0-1)
+    """
+
+    rgb_prime = rgb_image / 255.0
+    return rgb_prime**gamma
