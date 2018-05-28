@@ -2,6 +2,9 @@
 
 import numpy as np
 
+from Sandbox.utils.image_utils import split_image
+from Sandbox.utils.dct import dct2
+
 """
 JPEG algorithm steps
 1) Convert RGB to  Y′CBCR
@@ -22,6 +25,20 @@ class JpegCompressor(object):
         self._k_b = 0.114
 
         self.rgb_image = rgb_image
+
+    def compress(self):
+        """Returns JPEG compressed image data"""
+        self.rgb_to_ycbcr()
+
+        blocks_y = split_image(self.ycbcr_image[:, :, 0])
+        blocks_cb = split_image(self.ycbcr_image[:, :, 1])
+        blocks_cr = split_image(self.ycbcr_image[:, :, 2])
+
+        dct_blocks = []
+        for n, blocks in enumerate([blocks_y, blocks_cb, blocks_cr]):
+            dct_blocks.append(list(map(dct2, blocks)))
+
+        return dct_blocks
 
     def rgb_to_ycbcr(self):
         """Converts an 8-bit RGB image to a gamma corrected Y'CBCR Image

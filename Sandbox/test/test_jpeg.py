@@ -6,6 +6,7 @@ import unittest
 from numpy.testing import assert_allclose
 
 from Sandbox.jpeg.jpeg import JpegCompressor
+from Sandbox.utils.dct import dct2
 
 
 class TestImageFormatTransforms(unittest.TestCase):
@@ -80,6 +81,28 @@ class TestImageFormatTransforms(unittest.TestCase):
         self.assertGreaterEqual(np.min(jpeg.ycbcr_image), 0)
         self.assertLessEqual(np.max(jpeg.ycbcr_image), 255)
         self.assertEqual(jpeg.ycbcr_image.dtype, np.uint8)
+
+
+class TestJpegCompressor(unittest.TestCase):
+    """Test the JPEG compression chain"""
+    def setUp(self):
+        self.data = skimage.data.astronaut()
+
+    def test_compress(self):
+        """Test the compression chain"""
+        jpeg = JpegCompressor(self.data)
+        compressed = jpeg.compress()
+
+        self.assertIsInstance(compressed, list)
+        for elem in compressed:
+            self.assertIsInstance(elem, list)
+
+        for chan in range(3):
+            block_0 = compressed[chan][0]
+            self.assertEqual(block_0.shape, (8, 8))
+
+            expected = dct2(jpeg.ycbcr_image[:8, :8, chan])
+            assert_allclose(block_0, expected)
 
 
 if __name__ == '__main__':
