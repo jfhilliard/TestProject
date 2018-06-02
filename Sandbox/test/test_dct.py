@@ -107,6 +107,7 @@ class TEST2DDCT(unittest.TestCase):
         """Test inverse 2D DCT inverts the forward 2D DCT"""
         for x in self.x_cos2_list:
             y = dct2(x)
+            import pdb; pdb.set_trace()
             z = idct2(y)
 
             assert_allclose(z, x, atol=1e-10)
