@@ -5,8 +5,8 @@ import skimage.data
 import unittest
 from numpy.testing import assert_allclose
 
-from Sandbox.jpeg.jpeg import (rgb_to_ypbpr, rgb_to_ycbcr, k_r, k_g, k_b,
-                               gamma_correct)
+from Sandbox.jpeg.jpeg import JpegCompressor
+from Sandbox.utils.dct import dct2
 
 
 class TestImageFormatTransforms(unittest.TestCase):
@@ -16,7 +16,8 @@ class TestImageFormatTransforms(unittest.TestCase):
 
     def test_rgb_to_ypbpr(self):
         """Test RGB to Y'PbPr converter"""
-        ypbpr_out = rgb_to_ypbpr(self.data)
+        jpeg = JpegCompressor(self.data)
+        ypbpr_out = jpeg.rgb_to_ypbpr()
 
         # Shape should be the same
         self.assertEqual(ypbpr_out.shape, self.data.shape)
@@ -27,29 +28,38 @@ class TestImageFormatTransforms(unittest.TestCase):
         self.assertGreaterEqual(np.min(ypbpr_out[:, :, 1:3]), -0.5)
         self.assertLessEqual(np.max(ypbpr_out[:, :, 1:3]), 0.5)
 
+        k_r = jpeg._k_r
+        k_g = jpeg._k_g
+        k_b = jpeg._k_b
+
         # Test data correctness (Red)
         red_rgb = np.array([[[1, 0, 0]]])
-        red_ycbcr = rgb_to_ypbpr(red_rgb)
+        jpeg = JpegCompressor(red_rgb)
+        red_ycbcr = jpeg.rgb_to_ypbpr()
         assert_allclose(red_ycbcr, [[[k_r, -0.5 * k_r / (1 - k_b), 0.5]]])
 
         # Test data correctness (Green)
         green_rgb = np.array([[[0, 1, 0]]])
-        green_ycbcr = rgb_to_ypbpr(green_rgb)
+        jpeg = JpegCompressor(green_rgb)
+        green_ycbcr = jpeg.rgb_to_ypbpr()
         assert_allclose(green_ycbcr, [[[k_g, -0.5 * k_g / (1 - k_b),
                                         -0.5 * k_g / (1 - k_r)]]])
         # Test data correctness (Blue)
         blue_rgb = np.array([[[0, 0, 1]]])
-        blue_ycbcr = rgb_to_ypbpr(blue_rgb)
+        jpeg = JpegCompressor(blue_rgb)
+        blue_ycbcr = jpeg.rgb_to_ypbpr()
         assert_allclose(blue_ycbcr, [[[k_b, 0.5, -0.5 * k_b / (1 - k_r)]]])
 
         # Test data correctness (White)
         white_rgb = np.array([[[1, 1, 1]]])
-        white_ycbcr = rgb_to_ypbpr(white_rgb)
+        jpeg = JpegCompressor(white_rgb)
+        white_ycbcr = jpeg.rgb_to_ypbpr()
         assert_allclose(white_ycbcr, [[[1, 0, 0]]], atol=1e-10)
 
     def test_gamma_correction(self):
         """Test gamma correction function"""
-        rgb_prime = gamma_correct(self.data)
+        jpeg = JpegCompressor([])
+        rgb_prime = jpeg.gamma_correct(self.data)
 
         self.assertEqual(rgb_prime.shape, self.data.shape)
         self.assertGreaterEqual(np.min(rgb_prime), 0)
@@ -58,18 +68,41 @@ class TestImageFormatTransforms(unittest.TestCase):
         # Test different values of gamma
         test_gammas = [.25, .5, .75, 1, 1.25]
         for gamma in test_gammas:
-            y = gamma_correct(127, gamma=gamma)
+            y = jpeg.gamma_correct(127, gamma=gamma)
 
             self.assertAlmostEqual(y, (127 / 255)**gamma)
 
     def test_rgb_to_ycbcr(self):
-        ycbcr_out = rgb_to_ycbcr(self.data)
+        jpeg = JpegCompressor(self.data)
+        jpeg.rgb_to_ycbcr()
 
         # Test size, value ranges, and type
-        self.assertEqual(ycbcr_out.shape, self.data.shape)
-        self.assertGreaterEqual(np.min(ycbcr_out), 0)
-        self.assertLessEqual(np.max(ycbcr_out), 255)
-        self.assertEqual(ycbcr_out.dtype, np.uint8)
+        self.assertEqual(jpeg.ycbcr_image.shape, self.data.shape)
+        self.assertGreaterEqual(np.min(jpeg.ycbcr_image), 0)
+        self.assertLessEqual(np.max(jpeg.ycbcr_image), 255)
+        self.assertEqual(jpeg.ycbcr_image.dtype, np.uint8)
+
+
+class TestJpegCompressor(unittest.TestCase):
+    """Test the JPEG compression chain"""
+    def setUp(self):
+        self.data = skimage.data.astronaut()
+
+    def test_compress(self):
+        """Test the compression chain"""
+        jpeg = JpegCompressor(self.data)
+        compressed = jpeg.compress()
+
+        self.assertIsInstance(compressed, list)
+        for elem in compressed:
+            self.assertIsInstance(elem, list)
+
+        for chan in range(3):
+            block_0 = compressed[chan][0]
+            self.assertEqual(block_0.shape, (8, 8))
+
+            expected = dct2(jpeg.ycbcr_image[:8, :8, chan])
+            assert_allclose(block_0, expected)
 
 
 if __name__ == '__main__':
