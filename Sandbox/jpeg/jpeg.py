@@ -19,7 +19,7 @@ JPEG algorithm steps
 class JpegCompressor(object):
     """JPEG Compression class"""
     def __init__(self, rgb_image):
-        # Color concversion constants
+        # Color concversion constants from ITU-R BT.601 specification
         self._k_r = 0.299
         self._k_g = 0.587
         self._k_b = 0.114
