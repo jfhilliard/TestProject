@@ -48,4 +48,4 @@ def dct2(x):
 def idct2(x):
     """Returns the 2d DCT of 2d array x"""
     x = idct(x, axis=0)
-    return idct(x, axis=1)
+    return idct(x, axis=1).T

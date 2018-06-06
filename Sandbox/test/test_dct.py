@@ -105,6 +105,16 @@ class TEST2DDCT(unittest.TestCase):
             assert_allclose(y, y_scipy / (2.0**2.0), atol=1e-10,
                             err_msg="Failed Test " + str(n))
 
+    def test_vs_scipy_idct2(self):
+        """Test they my IDCT2 gives same results as scipy"""
+        for n, x in enumerate(self.x_cos2_list):
+            y = idct2(x)
+            y_scipy = scipy.fftpack.idctn(x)
+
+            # Scipy has a scale factor of N^2 difference
+            assert_allclose(y, y_scipy / y_scipy.size, atol=1e-10,
+                            err_msg="Failed Test " + str(n))
+
     def test_idct2(self):
         """Test inverse 2D DCT inverts the forward 2D DCT"""
         for n, x in enumerate(self.x_cos2_list):
