@@ -29,11 +29,12 @@ def idct(x, axis=0):
     x1 = np.take(x, n, axis)
     if axis == 1:
         X = np.matmul(x1, np.cos(np.pi / N * np.outer(n, k + 0.5)))
+        X += 0.5 * np.take(x, 0, axis=axis)[:, np.newaxis]
     elif axis == 0:
         X = np.matmul(x1.T, np.cos(np.pi / N * np.outer(n, k + 0.5))).T
+        X += 0.5 * np.take(x, 0, axis=axis)
     else:
         raise("Unsupported Axis. Only 0 or 1 is valid")
-    X += 0.5 * np.take(x, 0, axis=axis)
     X *= 2 / N
 
     return X
@@ -48,4 +49,4 @@ def dct2(x):
 def idct2(x):
     """Returns the 2d DCT of 2d array x"""
     x = idct(x, axis=0)
-    return idct(x, axis=1).T
+    return idct(x, axis=1)

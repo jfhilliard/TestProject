@@ -33,6 +33,17 @@ class TestDCT(unittest.TestCase):
             y = dct(x)
             assert_allclose(y, expected, atol=1e-10)
 
+    def test_dct_axis(self):
+        """Test the DCT axis parameter"""
+        for x, expected in zip(self.x_list, self.expected_list):
+            X = np.array([x, x])
+            Y = dct(X, axis=1)
+            assert_allclose(Y, np.array([expected, expected]), atol=1e-10)
+
+            X = np.array([x, x]).T
+            Y = dct(X, axis=0)
+            assert_allclose(Y, np.array([expected, expected]).T, atol=1e-10)
+
     def test_vs_scipy_dct(self):
         """Test that my DCT gives same result as scipy"""
         for x in self.x_list:
@@ -49,6 +60,21 @@ class TestDCT(unittest.TestCase):
             x_inv = idct(y)
 
             assert_allclose(x_inv, x, atol=1e-10)
+
+    def test_inverse_dct_axis(self):
+        """Test the IDCT axis parameter"""
+        for x in self.x_list:
+            X = np.array([x, x])
+            Y = dct(X, axis=1)
+            X_inv = idct(Y, axis=1)
+
+            assert_allclose(X_inv, X, atol=1e-10)
+
+            X = np.array([x, x]).T
+            Y = dct(X, axis=0)
+            X_inv = idct(Y, axis=0)
+
+            assert_allclose(X_inv, X, atol=1e-10)
 
 
 class TEST2DDCT(unittest.TestCase):
