@@ -5,6 +5,9 @@ import numpy as np
 
 def dct(x, axis=0):
     """Return the discrete cosine transform (DCT) of x (uses type 2 DCT)"""
+    if axis not in [0, 1]:
+        raise ValueError("Unsupported Axis. Only 0 or 1 is valid")
+
     N = x.shape[axis]
     X = np.zeros(x.shape)
     n = np.arange(N)
@@ -14,14 +17,15 @@ def dct(x, axis=0):
         X = np.matmul(x, np.cos(np.pi / N * np.outer(n + 0.5, k)))
     elif axis == 0:
         X = np.matmul(x.T, np.cos(np.pi / N * np.outer(n + 0.5, k))).T
-    else:
-        raise("Unsupported Axis. Only 0 or 1 is valid")
 
     return X
 
 
 def idct(x, axis=0):
     """Return the inverse discrete cosine transform (DCT) of x"""
+    if axis not in [0, 1]:
+        raise ValueError("Unsupported Axis. Only 0 or 1 is valid")
+
     N = x.shape[axis]
     n = np.arange(1, N)
     k = np.arange(N)
@@ -33,8 +37,7 @@ def idct(x, axis=0):
     elif axis == 0:
         X = np.matmul(x1.T, np.cos(np.pi / N * np.outer(n, k + 0.5))).T
         X += 0.5 * np.take(x, 0, axis=axis)
-    else:
-        raise("Unsupported Axis. Only 0 or 1 is valid")
+
     X *= 2 / N
 
     return X
