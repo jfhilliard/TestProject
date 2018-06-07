@@ -33,6 +33,20 @@ class TestDCT(unittest.TestCase):
             y = dct(x)
             assert_allclose(y, expected, atol=1e-10)
 
+    def test_dct_axis(self):
+        """Test the DCT axis parameter"""
+        for x, expected in zip(self.x_list, self.expected_list):
+            X = np.array([x, x])
+            Y = dct(X, axis=1)
+            assert_allclose(Y, np.array([expected, expected]), atol=1e-10)
+
+            X = np.array([x, x]).T
+            Y = dct(X, axis=0)
+            assert_allclose(Y, np.array([expected, expected]).T, atol=1e-10)
+
+        with self.assertRaises(ValueError):
+            dct(self.x_list[0], axis=2)
+
     def test_vs_scipy_dct(self):
         """Test that my DCT gives same result as scipy"""
         for x in self.x_list:
@@ -49,6 +63,24 @@ class TestDCT(unittest.TestCase):
             x_inv = idct(y)
 
             assert_allclose(x_inv, x, atol=1e-10)
+
+    def test_inverse_dct_axis(self):
+        """Test the IDCT axis parameter"""
+        for x in self.x_list:
+            X = np.array([x, x])
+            Y = dct(X, axis=1)
+            X_inv = idct(Y, axis=1)
+
+            assert_allclose(X_inv, X, atol=1e-10)
+
+            X = np.array([x, x]).T
+            Y = dct(X, axis=0)
+            X_inv = idct(Y, axis=0)
+
+            assert_allclose(X_inv, X, atol=1e-10)
+
+        with self.assertRaises(ValueError):
+            idct(self.x_list[0], axis=2)
 
 
 class TEST2DDCT(unittest.TestCase):
@@ -92,24 +124,36 @@ class TEST2DDCT(unittest.TestCase):
         """Test my 2D DCT function"""
         for n, x in enumerate(self.x_cos2_list):
             y = dct2(x)
-            assert_allclose(y, self.expected_cos2_list[n], atol=1e-10)
+            assert_allclose(y, self.expected_cos2_list[n], atol=1e-10,
+                            err_msg="Failed Test " + str(n))
 
     def test_vs_scipy_dct2(self):
         """Test that my DCT2 gives same result as scipy"""
-        for x in self.x_cos2_list:
+        for n, x in enumerate(self.x_cos2_list):
             y = dct2(x)
             y_scipy = scipy.fftpack.dctn(x)
 
             # Scipy has a scale factor of 2^2 difference
-            assert_allclose(y, y_scipy / (2.0**2.0), atol=1e-10)
+            assert_allclose(y, y_scipy / (2.0**2.0), atol=1e-10,
+                            err_msg="Failed Test " + str(n))
+
+    def test_vs_scipy_idct2(self):
+        """Test they my IDCT2 gives same results as scipy"""
+        for n, x in enumerate(self.x_cos2_list):
+            y = idct2(x)
+            y_scipy = scipy.fftpack.idctn(x)
+
+            # Scipy has a scale factor of N^2 difference
+            assert_allclose(y, y_scipy / y_scipy.size, atol=1e-10,
+                            err_msg="Failed Test " + str(n))
 
     def test_idct2(self):
         """Test inverse 2D DCT inverts the forward 2D DCT"""
-        for x in self.x_cos2_list:
+        for n, x in enumerate(self.x_cos2_list):
             y = dct2(x)
             z = idct2(y)
 
-            assert_allclose(z, x, atol=1e-10)
+            assert_allclose(z, x, atol=1e-10, err_msg="Failed Test " + str(n))
 
 
 if __name__ == '__main__':
