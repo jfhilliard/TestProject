@@ -93,6 +93,7 @@ class TestJpegCompressor(unittest.TestCase):
         jpeg = JpegCompressor(self.data)
         compressed = jpeg.compress()
 
+        # Test that all the data types are correct
         self.assertIsInstance(compressed, np.ndarray)
         for elem in compressed:
             self.assertIsInstance(elem, np.ndarray)
@@ -101,6 +102,9 @@ class TestJpegCompressor(unittest.TestCase):
             block_0 = compressed[chan][0]
             self.assertEqual(block_0.shape, (8, 8))
             self.assertEqual(block_0.dtype.kind, 'i')
+
+        # Test that the compressed data is equal or smaller than the input
+        self.assertLessEqual(compressed.size, self.data.size)
 
         # TODO: Need a test to check value correctness
 
