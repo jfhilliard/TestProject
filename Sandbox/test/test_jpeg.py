@@ -3,7 +3,8 @@
 import numpy as np
 import skimage.data
 import unittest
-from numpy.testing import assert_allclose
+from numpy.testing import (assert_allclose, assert_array_equal,
+                           assert_array_almost_equal)
 
 from Sandbox.jpeg.jpeg import JpegCompressor
 
@@ -71,6 +72,13 @@ class TestImageFormatTransforms(unittest.TestCase):
 
             self.assertAlmostEqual(y, (127 / 255)**gamma)
 
+    def test_gamma_expansion(self):
+        """Test that gamma_expand inverts gamma correct"""
+        jpeg = JpegCompressor()
+        rgb_prime = jpeg.gamma_correct(self.data)
+        rgb_image = jpeg.gamma_expand(rgb_prime)
+        assert_array_almost_equal(rgb_image, self.data)
+
     def test_rgb_to_ycbcr(self):
         jpeg = JpegCompressor()
         ycbcr_image = jpeg.rgb_to_ycbcr(self.data)
@@ -80,6 +88,23 @@ class TestImageFormatTransforms(unittest.TestCase):
         self.assertGreaterEqual(np.min(ycbcr_image), 0)
         self.assertLessEqual(np.max(ycbcr_image), 255)
         self.assertEqual(ycbcr_image.dtype, np.uint8)
+
+    def test_ycbcr_to_rgb(self):
+        """Test the ycbcr_to_rgb inverts rgb_to_ycbcr"""
+        jpeg = JpegCompressor()
+        ycbcr_image = jpeg.rgb_to_ycbcr(self.data)
+        rgb_image = jpeg.ycbcr_to_rgb(ycbcr_image)
+
+        assert_array_equal(rgb_image, self.data)
+
+    def test_ypbpr_to_rgb(self):
+        """Test that ypbpr_rgb inverts rgb_to_ypbpr"""
+        jpeg = JpegCompressor()
+        rgb_prime = jpeg.gamma_correct(self.data)
+        ypbpr = jpeg.rgb_to_ypbpr(rgb_prime)
+        rgb_prime2 = jpeg.ypbpr_to_rgb(ypbpr)
+
+        assert_array_almost_equal(rgb_prime, rgb_prime2)
 
 
 class TestJpegCompressor(unittest.TestCase):

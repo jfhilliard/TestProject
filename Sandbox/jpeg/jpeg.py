@@ -2,8 +2,8 @@
 
 import numpy as np
 
-from Sandbox.utils.image_utils import split_image
-from Sandbox.utils.dct import dct2
+from Sandbox.utils.image_utils import split_image, unsplit_image
+from Sandbox.utils.dct import dct2, idct2
 
 """
 JPEG algorithm steps
@@ -54,11 +54,41 @@ class JpegCompressor(object):
 
     def decompress(self, jpeg_image):
         """Decompresses jpeg data into an rgb image"""
-        return jpeg_image
+        unquant_img = jpeg_image * self.Q + 128
+        ycbcr_blocks = [list(map(idct2, blocks)) for blocks in unquant_img]
+
+        # Hardcoded for astronaut image
+        ycbcr_list = [unsplit_image(x, (64, 64)) for x in ycbcr_blocks]
+
+        ycbcr_image = np.stack(ycbcr_list, 2)
+
+        rgb_image = self.ycbcr_to_rgb(ycbcr_image)
+
+        return rgb_image
 
     def quantize_freqs(self, block):
         """Quantize an block of data using the quantization matrix self.Q"""
         return np.round(block / self.Q).astype(int)
+
+    def ycbcr_to_rgb(self, ycbcr_image):
+        """Conberts Y'CBCR Image to an 8-bit RGB image"""
+        ypbpr_image = ycbcr_image / 255.0
+        ypbpr_image[:, :, 1:3] -= 0.5
+
+        rgb_prime = self.ypbpr_to_rgb(ypbpr_image)
+        return self.gamma_expand(rgb_prime)
+
+    def ypbpr_to_rgb(self, ypbpr_image):
+        """Converts a Y'PBPR image to an 8-bit RGB image"""
+        y_prime = ypbpr_image[:, :, 0]
+        c_b = ypbpr_image[:, :, 1]
+        c_r = ypbpr_image[:, :, 2]
+
+        r_prime = 2.0 * c_r * (1.0 - self._k_r) + y_prime
+        b_prime = 2.0 * c_b * (1.0 - self._k_b) + y_prime
+        g_prime = (y_prime - self._k_r * r_prime - self._k_b * b_prime) / self._k_g
+
+        return np.stack([r_prime, g_prime, b_prime], 2)
 
     def rgb_to_ycbcr(self, rgb_image):
         """Converts an 8-bit RGB image to a gamma corrected Y'CBCR Image
@@ -67,7 +97,6 @@ class JpegCompressor(object):
 
         Output: ycbcr_image with 8-bit channles (0-255)"""
         ypbpr_image = self.rgb_to_ypbpr(rgb_image)
-
         ypbpr_image[:, :, 1:3] += 0.5
         ycbcr_image = ypbpr_image * 255
 
@@ -104,3 +133,14 @@ class JpegCompressor(object):
 
         rgb_prime = rgb_image / 255.0
         return rgb_prime**gamma
+
+    @staticmethod
+    def gamma_expand(rgb_prime, gamma=0.45):
+        """Undo gamma correction and quantize to 8-bit pixels
+
+        Input: gamma scaled RGB image with floating point pixel values (0-1)
+
+        Output: RGB image with 8-bit pixel values
+        """
+        rgb_image = rgb_prime**(1 / gamma) * 255.0
+        return rgb_image.astype('uint8')
