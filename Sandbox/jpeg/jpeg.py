@@ -18,7 +18,7 @@ JPEG algorithm steps
 
 class JpegCompressor(object):
     """JPEG Compression class"""
-    def __init__(self, rgb_image):
+    def __init__(self):
         # Color concversion constants from ITU-R BT.601 specification
         self._k_r = 0.299
         self._k_g = 0.587
@@ -34,15 +34,13 @@ class JpegCompressor(object):
                            [49, 64, 78, 87, 103, 121, 120, 101],
                            [72, 92, 95, 98, 112, 100, 103, 99]])
 
-        self.rgb_image = rgb_image
-
-    def compress(self):
+    def compress(self, rgb_image):
         """Returns JPEG compressed image data"""
-        self.rgb_to_ycbcr()
+        ycbcr_image = self.rgb_to_ycbcr(rgb_image)
 
-        blocks_y = split_image(self.ycbcr_image[:, :, 0])
-        blocks_cb = split_image(self.ycbcr_image[:, :, 1])
-        blocks_cr = split_image(self.ycbcr_image[:, :, 2])
+        blocks_y = split_image(ycbcr_image[:, :, 0])
+        blocks_cb = split_image(ycbcr_image[:, :, 1])
+        blocks_cr = split_image(ycbcr_image[:, :, 2])
 
         dct_blocks = []
         for blocks in [blocks_y, blocks_cb, blocks_cr]:
@@ -54,26 +52,29 @@ class JpegCompressor(object):
 
         return quant_blocks
 
+    def decompress(self, jpeg_image):
+        """Decompresses jpeg data into an rgb image"""
+        return jpeg_image
+
     def quantize_freqs(self, block):
         """Quantize an block of data using the quantization matrix self.Q"""
         return np.round(block / self.Q).astype(int)
 
-    def rgb_to_ycbcr(self):
+    def rgb_to_ycbcr(self, rgb_image):
         """Converts an 8-bit RGB image to a gamma corrected Y'CBCR Image
 
         Input: rgb_image with 8-bit channels (0-255)
 
         Output: ycbcr_image with 8-bit channles (0-255)"""
-        ypbpr_image = self.rgb_to_ypbpr()
+        ypbpr_image = self.rgb_to_ypbpr(rgb_image)
 
         ypbpr_image[:, :, 1:3] += 0.5
         ycbcr_image = ypbpr_image * 255
 
-        self.ycbcr_image = ycbcr_image.astype('uint8')
+        return ycbcr_image.astype('uint8')
 
-    def rgb_to_ypbpr(self):
+    def rgb_to_ypbpr(self, rgb_image):
         """Converts an RGB image into a Y'PBPR image"""
-        rgb_image = self.rgb_image
         if rgb_image.dtype == 'uint8':
             rgb_image = self.gamma_correct(rgb_image)
 
