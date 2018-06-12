@@ -42,19 +42,19 @@ class JpegCompressor(object):
         blocks_cb = split_image(ycbcr_image[:, :, 1])
         blocks_cr = split_image(ycbcr_image[:, :, 2])
 
+        # TODO: need to subtract 128 to center data on 0 prior to DCT
         dct_blocks = []
         for blocks in [blocks_y, blocks_cb, blocks_cr]:
             dct_blocks.append(list(map(dct2, blocks)))
 
         dct_blocks = np.array(dct_blocks)
-        dct_blocks -= 128
         quant_blocks = self.quantize_freqs(dct_blocks)
 
         return quant_blocks
 
     def decompress(self, jpeg_image):
         """Decompresses jpeg data into an rgb image"""
-        unquant_img = jpeg_image * self.Q + 128
+        unquant_img = jpeg_image * self.Q
         ycbcr_blocks = [list(map(idct2, blocks)) for blocks in unquant_img]
 
         # Hardcoded for astronaut image
@@ -88,7 +88,13 @@ class JpegCompressor(object):
         b_prime = 2.0 * c_b * (1.0 - self._k_b) + y_prime
         g_prime = (y_prime - self._k_r * r_prime - self._k_b * b_prime) / self._k_g
 
-        return np.stack([r_prime, g_prime, b_prime], 2)
+        ypbpr = np.stack([r_prime, g_prime, b_prime], 2)
+
+        # Force values to inverval [0, 1]
+        ypbpr[ypbpr < 0.0] = 0.0
+        ypbpr[ypbpr > 1.0] = 1.0
+
+        return ypbpr
 
     def rgb_to_ycbcr(self, rgb_image):
         """Converts an 8-bit RGB image to a gamma corrected Y'CBCR Image

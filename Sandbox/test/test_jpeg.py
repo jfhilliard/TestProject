@@ -106,6 +106,13 @@ class TestImageFormatTransforms(unittest.TestCase):
 
         assert_array_almost_equal(rgb_prime, rgb_prime2)
 
+        # Test that all values are still 0-1 after quantization
+        ypbpr = jpeg.rgb_to_ypbpr(self.data)
+        rgb_prime2 = jpeg.ypbpr_to_rgb(ypbpr)
+
+        self.assertTrue(np.all(rgb_prime2 >= 0.0))
+        self.assertTrue(np.all(rgb_prime2 <= 1.0))
+
 
 class TestJpegCompressor(unittest.TestCase):
     """Test the JPEG compression chain"""
@@ -129,6 +136,11 @@ class TestJpegCompressor(unittest.TestCase):
 
         # Test that the compressed data is equal or smaller than the input
         self.assertLessEqual(compressed.size, self.data.size)
+
+        # In the current chain, there should be more zeros after compression
+        nonzero_in = np.count_nonzero(self.data)
+        nonzero_out = np.count_nonzero(compressed)
+        self.assertLess(nonzero_out, nonzero_in)
 
         # TODO: Need a test to check value correctness
 
